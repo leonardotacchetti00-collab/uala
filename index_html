@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta dei Vini Digitale</title>
+    <style>
+        /* STILE GRAFICO ELEGANTE */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400&display=swap');
+
+        :root {
+            --primary-color: #5e0b15; /* Rosso Vino */
+            --accent-color: #d4af37; /* Oro */
+            --bg-color: #fdfcfb;
+            --text-color: #1a1a1a;
+            --secondary-text: #666;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* HEADER E NAVIGAZIONE */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        /* TABS DI NAVIGAZIONE */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            position: sticky;
+            top: 0;
+            background: var(--bg-color);
+            padding: 15px 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--accent-color);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+
+        /* LISTA VINI */
+        .region-block {
+            margin-bottom: 50px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .region-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .wine-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .wine-info {
+            width: 100%;
+        }
+
+        .wine-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 4px;
+        }
+
+        .wine-producer {
+            font-size: 1rem;
+            color: #444;
+            font-style: italic;
+        }
+
+        .wine-details {
+            font-size: 0.85rem;
+            color: var(--secondary-text);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .wine-type-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            margin-left: 10px;
+            color: #555;
+            vertical-align: middle;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* MEDIA QUERIES */
+        @media (max-width: 600px) {
+            .tab-btn { flex: 1 1 40%; font-size: 0.9rem; padding: 8px; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Carta dei Vini</h1>
+        <p style="font-style:italic; color:#666;">Selezione Esclusiva</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="filterWines('BOLLICINE')">Bollicine</button>
+        <button class="tab-btn" onclick="filterWines('BIANCO')">Bianchi</button>
+        <button class="tab-btn" onclick="filterWines('ROSATO')">Rosati</button>
+        <button class="tab-btn" onclick="filterWines('ROSSO')">Rossi</button>
+        <button class="tab-btn" onclick="filterWines('DESSERT')">Dolci & Meditazione</button>
+    </div>
+
+    <div id="wine-list-container">
+        </div>
+</div>
+
+<script>
+    // DATABASE COMPLETO DEI VINI (Generato dalla tua lista)
+    const wineDB = [
+        // BIANCHI
+        {c:"BIANCO", n:"Trebbiano d’Abruzzo", p:"Valentini", r:"Abruzzo (ITA)", v:"Trebbiano", d:"DOC"},
+        {c:"BIANCO", n:"Onirocep", p:"Pantaleone", r:"Marche (ITA)", v:"Pecorino", d:"-"},
+        {c:"BIANCO", n:"Unterebner", p:"Tramin", r:"Alto Adige (ITA)", v:"Pinot Grigio", d:"DOC"},
+        {c:"BIANCO", n:"Sanct Valentin G.", p:"S. Michele Appiano", r:"Alto Adige (ITA)", v:"Gewürztraminer", d:"DOC"},
+        {c:"BIANCO", n:"Sanct Valentin S.", p:"S. Michele Appiano", r:"Alto Adige (ITA)", v:"Sauvignon", d:"DOC"},
+        {c:"BIANCO", n:"Sanct Valentin P.B.", p:"S. Michele Appiano", r:"Alto Adige (ITA)", v:"Pinot Bianco", d:"DOC"},
+        {c:"BIANCO", n:"Terlaner I Grand Cru", p:"Cantina Terlano", r:"Alto Adige (ITA)", v:"P. Bianco, Chard", d:"DOC"},
+        {c:"BIANCO", n:"Kreuth", p:"Cantina Terlano", r:"Alto Adige (ITA)", v:"Chardonnay", d:"DOC"},
+        {c:"BIANCO", n:"Quarz", p:"Cantina Terlano", r:"Alto Adige (ITA)", v:"Sauvignon", d:"DOC"},
+        {c:"BIANCO", n:"Nova Domus", p:"Cantina Terlano", r:"Alto Adige (ITA)", v:"P.Bianco, Chard, Sauv", d:"DOC"},
+        {c:"BIANCO", n:"Vorberg", p:"Cantina Terlano", r:"Alto Adige (ITA)", v:"Pinot Bianco", d:"DOC"},
+        {c:"BIANCO", n:"Stoan", p:"Tramin", r:"Alto Adige (ITA)", v:"Chard, Sauv, P.B.", d:"DOC"},
+        {c:"BIANCO", n:"Feldmarschall von Fenner", p:"Tiefenbrunner", r:"Alto Adige (ITA)", v:"Müller Thurgau", d:"DOC"},
+        {c:"BIANCO", n:"Muller Thurgau Vigna T.", p:"Elena Walch", r:"Alto Adige (ITA)", v:"Müller Thurgau", d:"DOC"},
+        {c:"BIANCO", n:"Gewürztraminer Castel R.", p:"Elena Walch", r:"Alto Adige (ITA)", v:"Gewürztraminer", d:"DOC"},
+        {c:"BIANCO", n:"Appius", p:"S. Michele Appiano", r:"Alto Adige (ITA)", v:"Blend Bianco", d:"DOC"},
+        {c:"BIANCO", n:"Chardonnay", p:"Catena Zapata", r:"Argentina", v:"Chardonnay", d:"IG"},
+        {c:"BIANCO", n:"Riesling Polish Hill", p:"Grosset", r:"Australia", v:"Riesling", d:"GI"},
+        {c:"BIANCO", n:"Chardonnay Art Series", p:"Leeuwin Estate", r:"Australia", v:"Chardonnay", d:"GI"},
+        {c:"BIANCO", n:"Riesling Smaragd Singer.", p:"Franz Hirtzberger", r:"Austria", v:"Riesling", d:"Wachau"},
+        {c:"BIANCO", n:"G. Veltliner Honivogl", p:"Franz Hirtzberger", r:"Austria", v:"Grüner Veltliner", d:"Wachau"},
+        {c:"BIANCO", n:"Ried Lamm", p:"Schloss Gobelsburg", r:"Austria", v:"Grüner Veltliner", d:"Kamptal"},
+        {c:"BIANCO", n:"Exultet", p:"Quintodecimo", r:"Campania (ITA)", v:"Fiano", d:"DOCG"},
+        {c:"BIANCO", n:"Giallo d'Arles", p:"Quintodecimo", r:"Campania (ITA)", v:"Greco di Tufo", d:"DOCG"},
+        {c:"BIANCO", n:"Greco di Tufo V. Cicogna", p:"Benito Ferrara", r:"Campania (ITA)", v:"Greco", d:"DOCG"},
+        {c:"BIANCO", n:"Fiano di Avellino Tognano", p:"Rocca del Principe", r:"Campania (ITA)", v:"Fiano", d:"DOCG"},
+        {c:"BIANCO", n:"Tufjano", p:"Colli di Castelfranci", r:"Campania (ITA)", v:"Fiano", d:"DOCG"},
+        {c:"BIANCO", n:"Fiorduva", p:"Marisa Cuomo", r:"Campania (ITA)", v:"Ripoli, Fenile, Ginestra", d:"DOC"},
+        {c:"BIANCO", n:"Montrachet Grand Cru", p:"Marquis de Laguiche", r:"Francia", v:"Chardonnay", d:"AOC"},
+        {c:"BIANCO", n:"Meursault", p:"Coche-Dury", r:"Francia", v:"Chardonnay", d:"AOC"},
+        {c:"BIANCO", n:"Chablis Les Clos", p:"Vincent Dauvissat", r:"Francia", v:"Chardonnay", d:"AOC"},
+        {c:"BIANCO", n:"Savennières Coulée d.S.", p:"Nicolas Joly", r:"Francia", v:"Chenin Blanc", d:"AOC"},
+        {c:"BIANCO", n:"Sancerre", p:"Alphonse Mellot", r:"Francia", v:"Sauvignon Blanc", d:"AOC"},
+        {c:"BIANCO", n:"Hermitage Blanc", p:"J.L. Chave", r:"Francia", v:"Marsanne, Roussanne", d:"AOC"},
+        {c:"BIANCO", n:"Corton-Charlemagne", p:"Bonneau du Martray", r:"Francia", v:"Chardonnay", d:"AOC"},
+        {c:"BIANCO", n:"Puligny-Montrachet", p:"Etienne Sauzet", r:"Francia", v:"Chardonnay", d:"AOC"},
+        {c:"BIANCO", n:"Chevalier-Montrachet", p:"Domaine Leflaive", r:"Francia", v:"Chardonnay", d:"AOC"},
+        {c:"BIANCO", n:"Condrieu La Doriane", p:"E. Guigal", r:"Francia", v:"Viognier", d:"AOC"},
+        {c:"BIANCO", n:"Muscadet Sèvre et Maine", p:"Jo Landron", r:"Francia", v:"Melon de Bourgogne", d:"AOC"},
+        {c:"BIANCO", n:"Riesling Clos Ste Hune", p:"Trimbach", r:"Francia", v:"Riesling", d:"AOC"},
+        {c:"BIANCO", n:"Gewurztraminer Cuvée A.", p:"Domaine Weinbach", r:"Francia", v:"Gewurztraminer", d:"AOC"},
+        {c:"BIANCO", n:"Sauvignon Blanc", p:"Domaine Vacheron", r:"Francia", v:"Sauvignon Blanc", d:"AOC"},
+        {c:"BIANCO", n:"Ribolla Anfora", p:"Gravner", r:"Friuli V.G. (ITA)", v:"Ribolla Gialla", d:"IGT"},
+        {c:"BIANCO", n:"Vintage Tunina", p:"Jermann", r:"Friuli V.G. (ITA)", v:"Sauv, Chard, Ribolla", d:"IGT"},
+        {c:"BIANCO", n:"Terre Alte", p:"Livio Felluga", r:"Friuli V.G. (ITA)", v:"Friulano, Sauv, P.B.", d:"DOC"},
+        {c:"BIANCO", n:"Jurosa", p:"Lis Neris", r:"Friuli V.G. (ITA)", v:"Chardonnay", d:"DOC"},
+        {c:"BIANCO", n:"Ronco delle Cime", p:"Venica&Venica", r:"Friuli V.G. (ITA)", v:"Friulano", d:"DOC"},
+        {c:"BIANCO", n:"Capo Martino", p:"Jermann", r:"Friuli V.G. (ITA)", v:"Friulano, Picolit", d:"IGT"},
+        {c:"BIANCO", n:"Vinnaioli", p:"Jermann", r:"Friuli V.G. (ITA)", v:"Chardonnay, Sauv.", d:"IGT"},
+        {c:"BIANCO", n:"Pinot Grigio Dessimis", p:"Vie di Romans", r:"Friuli V.G. (ITA)", v:"Pinot Grigio", d:"DOC"},
+        {c:"BIANCO", n:"Chardonnay Vie di Romans", p:"Vie di Romans", r:"Friuli V.G. (ITA)", v:"Chardonnay", d:"DOC"},
+        {c:"BIANCO", n:"Sauvignon Vieris", p:"Vie di Romans", r:"Friuli V.G. (ITA)", v:"Sauvignon", d:"DOC"},
+        {c:"BIANCO", n:"Dut'un", p:"Vie di Romans", r:"Friuli V.G. (ITA)", v:"Chardonnay, Sauv.", d:"IGT"},
+        {c:"BIANCO", n:"Scharzhofberger Kabinett", p:"Egon Müller", r:"Germania", v:"Riesling", d:"Prädikat"},
+        {c:"BIANCO", n:"Bernkasteler Doctor Spät.", p:"Dr. Thanisch", r:"Germania", v:"Riesling", d:"Prädikat"},
+        {c:"BIANCO", n:"Kiedrich Gräfenberg GG", p:"Robert Weil", r:"Germania", v:"Riesling", d:"VDP.GL"},
+        {c:"BIANCO", n:"Wehlener Sonnenuhr Ausl.", p:"Dr. Loosen", r:"Germania", v:"Riesling", d:"Prädikat"},
+        {c:"BIANCO", n:"Assyrtiko", p:"Estate Argyros", r:"Grecia", v:"Assyrtiko", d:"PDO"},
+        {c:"BIANCO", n:"Luna Mater", p:"Fontana Candida", r:"Lazio (ITA)", v:"Malvasia, Bombino", d:"DOCG"},
+        {c:"BIANCO", n:"Poggio della Costa", p:"Sergio Mottura", r:"Lazio (ITA)", v:"Grechetto", d:"IGT"},
+        {c:"BIANCO", n:"Latour a Civitella", p:"Sergio Mottura", r:"Lazio (ITA)", v:"Grechetto", d:"IGT"},
+        {c:"BIANCO", n:"Classico Superiore", p:"Andrea Felici", r:"Marche (ITA)", v:"Verdicchio", d:"DOC"},
+        {c:"BIANCO", n:"Tralivio", p:"Sartarelli", r:"Marche (ITA)", v:"Verdicchio", d:"DOC"},
+        {c:"BIANCO", n:"Matelica", p:"ColleStefano", r:"Marche (ITA)", v:"Verdicchio", d:"DOC"},
+        {c:"BIANCO", n:"Mischiati", p:"Fattoria San Lorenzo", r:"Marche (ITA)", v:"Verdicchio, Trebbiano", d:"IGT"},
+        {c:"BIANCO", n:"Villa Bucci Riserva", p:"Villa Bucci", r:"Marche (ITA)", v:"Verdicchio", d:"DOCG"},
+        {c:"BIANCO", n:"Bucci Classico", p:"Villa Bucci", r:"Marche (ITA)", v:"Verdicchio", d:"DOC"},
+        {c:"BIANCO", n:"Gaiospino", p:"Fattoria Coroncino", r:"Marche (ITA)", v:"Verdicchio", d:"DOC"},
+        {c:"BIANCO", n:"Vecchie Vigne", p:"Umani Ronchi", r:"Marche (ITA)", v:"Verdicchio", d:"DOC"},
+        {c:"BIANCO", n:"Cuprese", p:"Colonnara", r:"Marche (ITA)", v:"Verdicchio", d:"DOC"},
+        {c:"BIANCO", n:"San Sisto", p:"Fazi Battaglia", r:"Marche (ITA)", v:"Verdicchio", d:"DOCG"},
+        {c:"BIANCO", n:"Balciana", p:"Sartarelli", r:"Marche (ITA)", v:"Verdicchio", d:"DOC"},
+        {c:"BIANCO", n:"Stefano Antonucci", p:"Santa Barbara", r:"Marche (ITA)", v:"Verdicchio", d:"DOC"},
+        {c:"BIANCO", n:"Georgòs", p:"Tenuta La Riserva", r:"Marche (ITA)", v:"Pecorino", d:"DOCG"},
+        {c:"BIANCO", n:"Fenèsia", p:"Terra Fageto", r:"Marche (ITA)", v:"Pecorino", d:"DOCG"},
+        {c:"BIANCO", n:"Ciprea", p:"Simone Capecci", r:"Marche (ITA)", v:"Pecorino", d:"DOCG"},
+        {c:"BIANCO", n:"Il Piuma", p:"San Filippo", r:"Marche (ITA)", v:"Pecorino", d:"DOCG"},
+        {c:"BIANCO", n:"Offida Pecorino", p:"Terre Piane", r:"Marche (ITA)", v:"Pecorino", d:"DOCG"},
+        {c:"BIANCO", n:"Salsedine", p:"Terra Fageto", r:"Marche (ITA)", v:"Pecorino", d:"IGT"},
+        {c:"BIANCO", n:"Aspralama", p:"Pantaleone", r:"Marche (ITA)", v:"Pecorino", d:"IGT"},
+        {c:"BIANCO", n:"MC", p:"Tenuta Sant'Isidoro", r:"Marche (ITA)", v:"Ribona (Maceratino)", d:"DOC"},
+        {c:"BIANCO", n:"Sauvignon Blanc", p:"Cloudy Bay", r:"N. Zelanda", v:"Sauvignon Blanc", d:"GI"},
+        {c:"BIANCO", n:"Derthona", p:"Fratelli Massa", r:"Piemonte (ITA)", v:"Timorasso", d:"DOC"},
+        {c:"BIANCO", n:"Gaia & Rey", p:"Gaja", r:"Piemonte (ITA)", v:"Chardonnay", d:"DOC"},
+        {c:"BIANCO", n:"Gavi dei Gavi E. Nera", p:"La Scolca", r:"Piemonte (ITA)", v:"Cortese", d:"DOCG"},
+        {c:"BIANCO", n:"Roero Arneis", p:"Vietti", r:"Piemonte (ITA)", v:"Arneis", d:"DOCG"},
+        {c:"BIANCO", n:"Anthos", p:"Matteo Correggia", r:"Piemonte (ITA)", v:"Brachetto Secco", d:"Vino Bianco"},
+        {c:"BIANCO", n:"Vermentino Argiolas", p:"Argiolas", r:"Sardegna (ITA)", v:"Vermentino", d:"DOC"},
+        {c:"BIANCO", n:"Vermentino Stellato", p:"Pala", r:"Sardegna (ITA)", v:"Vermentino", d:"DOC"},
+        {c:"BIANCO", n:"Ruinas", p:"Deiana", r:"Sardegna (ITA)", v:"Vermentino", d:"IGT"},
+        {c:"BIANCO", n:"Pietra Marina", p:"Benanti", r:"Sicilia (ITA)", v:"Carricante", d:"DOC"},
+        {c:"BIANCO", n:"Chardonnay", p:"Tasca d'Almerita", r:"Sicilia (ITA)", v:"Chardonnay", d:"DOC"},
+        {c:"BIANCO", n:"Vigna di Gabri", p:"Donnafugata", r:"Sicilia (ITA)", v:"Ansonica", d:"DOC"},
+        {c:"BIANCO", n:"Cometa", p:"Planeta", r:"Sicilia (ITA)", v:"Fiano", d:"IGT"},
+        {c:"BIANCO", n:"Tondonia Reserva Blanco", p:"R. Lopez de Heredia", r:"Spagna", v:"Viura, Malvasia", d:"DOCa"},
+        {c:"BIANCO", n:"Albariño Pazo Señorans", p:"Pazo Señorans", r:"Spagna", v:"Albariño", d:"DO"},
+        {c:"BIANCO", n:"Palladius", p:"Sadie Family", r:"Sud Africa", v:"Chenin Blend", d:"WO"},
+        {c:"BIANCO", n:"Vernaccia Riserva", p:"Panizzi", r:"Toscana (ITA)", v:"Vernaccia", d:"DOCG"},
+        {c:"BIANCO", n:"Batar", p:"Querciabella", r:"Toscana (ITA)", v:"Chard, Pinot B.", d:"IGT"},
+        {c:"BIANCO", n:"Cervaro della Sala", p:"Castello della Sala", r:"Umbria (ITA)", v:"Chardonnay, Grechetto", d:"IGT"},
+        {c:"BIANCO", n:"Bianco dei Regine", p:"Castello delle Regine", r:"Umbria (ITA)", v:"Blend", d:"IGT"},
+        {c:"BIANCO", n:"Les Noisetiers", p:"Kistler", r:"USA", v:"Chardonnay", d:"AVA"},
+        {c:"BIANCO", n:"Monte Carbonare", p:"Suavia", r:"Veneto (ITA)", v:"Garganega", d:"DOC"},
+        {c:"BIANCO", n:"Lugana Riserva", p:"Sergio Zenato", r:"Veneto (ITA)", v:"Turbiana", d:"DOC"},
+
+        // BOLLICINE & CHAMPAGNE
+        {c:"BOLLICINE", t:"Ancestrale", n:"Il Fric", p:"Casebianche", r:"Campania (ITA)", v:"Aglianico", d:"IGT"},
+        {c:"BOLLICINE", t:"Ancestrale", n:"Rumìa", p:"San Filippo", r:"Marche (ITA)", v:"Passerina", d:"V. Spumante"},
+        {c:"BOLLICINE", t:"Charmat", n:"Asprinio di Aversa", p:"I Borboni", r:"Campania (ITA)", v:"Asprinio", d:"DOC"},
+        {c:"BOLLICINE", t:"Charmat", n:"Falanghina Brut", p:"La Guardiense", r:"Campania (ITA)", v:"Falanghina", d:"DOC"},
+        {c:"BOLLICINE", t:"Charmat", n:"Leclisse", p:"Paltrinieri", r:"Emilia R. (ITA)", v:"Lambrusco Sorbara", d:"DOC"},
+        {c:"BOLLICINE", t:"Charmat", n:"Concerto", p:"Medici Ermete", r:"Emilia R. (ITA)", v:"Lambrusco Salamino", d:"DOC"},
+        {c:"BOLLICINE", t:"Charmat", n:"Pignoletto Brut", p:"Lodi Corazza", r:"Emilia R. (ITA)", v:"Grechetto Gentile", d:"DOC"},
+        {c:"BOLLICINE", t:"Charmat", n:"Ribolla Gialla Brut", p:"Collavini", r:"Friuli V.G. (ITA)", v:"Ribolla Gialla", d:"VSQ"},
+        {c:"BOLLICINE", t:"Charmat", n:"Gran Cuvée", p:"Casale del Giglio", r:"Lazio (ITA)", v:"Bellone", d:"VSQ"},
+        {c:"BOLLICINE", t:"Charmat", n:"Vives", p:"Tenuta La Riserva", r:"Marche (ITA)", v:"Passerina", d:"VSQ"},
+        {c:"BOLLICINE", t:"Charmat", n:"Particolare Brut", p:"Tenuta del Buonamico", r:"Toscana (ITA)", v:"Trebbiano, Semillon", d:"VSQ"},
+        {c:"BOLLICINE", t:"Charmat", n:"Private Cartizze", p:"Ruggeri", r:"Veneto (ITA)", v:"Glera", d:"DOCG"},
+        {c:"BOLLICINE", t:"Charmat", n:"Rive di Colbertaldo", p:"Masottina", r:"Veneto (ITA)", v:"Glera", d:"DOCG"},
+        {c:"BOLLICINE", t:"Charmat", n:"Grave di Stecca", p:"Nino Franco", r:"Veneto (ITA)", v:"Glera", d:"DOCG"},
+        {c:"BOLLICINE", t:"Charmat", n:"Prosecco Millesimato", p:"Val d’Oca", r:"Veneto (ITA)", v:"Glera", d:"DOCG"},
+        {c:"BOLLICINE", t:"Charmat", n:"Jeio Rosé", p:"Bisol", r:"Veneto (ITA)", v:"Glera, Pinot Nero", d:"DOC"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Dubl ES", p:"Feudi S. Gregorio", r:"Campania (ITA)", v:"Greco", d:"VSQ"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Annamaria Clementi", p:"Ca’ del Bosco", r:"Lombardia (ITA)", v:"Chard, P.B, P.N", d:"DOCG"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Alma Gran Cuvée", p:"Bellavista", r:"Lombardia (ITA)", v:"Chard, P.N", d:"DOCG"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"61 Nature Millesimato", p:"Berlucchi", r:"Lombardia (ITA)", v:"P.N, Chard", d:"DOCG"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Satèn", p:"Ricci Curbastro", r:"Lombardia (ITA)", v:"Chardonnay", d:"DOCG"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Cabochon", p:"Monte Rossa", r:"Lombardia (ITA)", v:"Chard, P.N", d:"DOCG"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"LH2 Extra Brut", p:"Umani Ronchi", r:"Marche (ITA)", v:"Verdicchio", d:"VSQ"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Donna Giulia", p:"Fattoria Le Terrazze", r:"Marche (ITA)", v:"Montepulciano", d:"VSQ"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Alta Langa 2021", p:"Pietro Colla", r:"Piemonte (ITA)", v:"P.N, Chard", d:"DOCG"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Blanc de Noirs", p:"Pietro Colla", r:"Piemonte (ITA)", v:"P.N, Nebbiolo", d:"VSQ"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Soldati La Scolca", p:"La Scolca", r:"Piemonte (ITA)", v:"Cortese", d:"VSQ"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Gran Cuvée XXI Secolo", p:"d'Araprì", r:"Puglia (ITA)", v:"Bombino, P.N", d:"VSQ"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"700 S.L.M.", p:"Cusumano", r:"Sicilia (ITA)", v:"P.N, Chard", d:"DOC"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Trento Brut", p:"Ferrari", r:"Trentino (ITA)", v:"Chardonnay", d:"DOC"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Giulio Ferrari Riserva", p:"Ferrari", r:"Trentino (ITA)", v:"Chardonnay", d:"DOC"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Riserva del Fondatore", p:"Letrari", r:"Trentino (ITA)", v:"Chard, P.N", d:"DOC"},
+        {c:"BOLLICINE", t:"Metodo Classico", n:"Pas Dosé", p:"Scacciadiavoli", r:"Umbria (ITA)", v:"Sagrantino", d:"VSQ"},
+        {c:"BOLLICINE", t:"Champagne", n:"Grande Cuvée", p:"Krug", r:"Francia", v:"Blend", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Dom Pérignon", p:"Moët & Chandon", r:"Francia", v:"Chard, P.N", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Belle Epoque", p:"Perrier-Jouët", r:"Francia", v:"Chard, P.N", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Cristal", p:"Louis Roederer", r:"Francia", v:"P.N, Chard", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Comtes de Champagne", p:"Taittinger", r:"Francia", v:"Chardonnay", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"La Grande Dame", p:"Veuve Clicquot", r:"Francia", v:"Pinot Noir", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Special Cuvée", p:"Bollinger", r:"Francia", v:"Blend", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"R.D. (Récemment Dégorgé)", p:"Bollinger", r:"Francia", v:"P.N, Chard", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Blanc de Blancs", p:"Ruinart", r:"Francia", v:"Chardonnay", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Substance", p:"Jacques Selosse", r:"Francia", v:"Chardonnay", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Salon Le Mesnil", p:"Salon", r:"Francia", v:"Chardonnay", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Cuvée Sir Winston Churchill", p:"Pol Roger", r:"Francia", v:"P.N, Chard", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Grand Siècle", p:"Laurent-Perrier", r:"Francia", v:"Chard, P.N", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Grande Réserve", p:"Gosset", r:"Francia", v:"Chard, P.N", d:"AOC"},
+        {c:"BOLLICINE", t:"Champagne", n:"Nicolas François", p:"Billecart-Salmon", r:"Francia", v:"P.N, Chard", d:"AOC"},
+
+        // DESSERT
+        {c:"DESSERT", n:"Beerenauslese", p:"Kracher", r:"Austria", v:"Welschriesling", d:"Prädikat"},
+        {c:"DESSERT", n:"Ch. d'Yquem", p:"Lur Saluces", r:"Francia", v:"Semillon, Sauv.", d:"AOC"},
+        {c:"DESSERT", n:"Quarts de Chaume", p:"Domaine des Baumard", r:"Francia", v:"Chenin Blanc", d:"AOC"},
+        {c:"DESSERT", n:"Banyuls Rimage", p:"M. Chapoutier", r:"Francia", v:"Grenache", d:"AOC"},
+        {c:"DESSERT", n:"Picolit", p:"Livio Felluga", r:"Friuli V.G. (ITA)", v:"Picolit", d:"DOCG"},
+        {c:"DESSERT", n:"Verduzzo Cratis", p:"Scubla", r:"Friuli V.G. (ITA)", v:"Verduzzo Friulano", d:"DOCG"},
+        {c:"DESSERT", n:"Eiswein", p:"Schloss Johannisberg", r:"Germania", v:"Riesling", d:"Prädikat"},
+        {c:"DESSERT", n:"Trockenbeerenauslese", p:"Dönnhoff", r:"Germania", v:"Riesling", d:"Prädikat"},
+        {c:"DESSERT", n:"Brachetto d'Acqui", p:"Braida", r:"Piemonte (ITA)", v:"Brachetto", d:"DOCG"},
+        {c:"DESSERT", n:"Moscato d'Asti Bricco Q.", p:"La Spinetta", r:"Piemonte (ITA)", v:"Moscato Bianco", d:"DOCG"},
+        {c:"DESSERT", n:"Vintage Port", p:"Taylor's", r:"Portogallo", v:"Touriga Nac. Blend", d:"DOC"},
+        {c:"DESSERT", n:"Madeira 20 Y.O.", p:"Blandy's", r:"Portogallo", v:"Malmsey", d:"DOP"},
+        {c:"DESSERT", n:"Ben Ryé", p:"Donnafugata", r:"Sicilia (ITA)", v:"Zibibbo", d:"DOC"},
+        {c:"DESSERT", n:"Bukkuram Padre della V.", p:"Marco de Bartoli", r:"Sicilia (ITA)", v:"Zibibbo", d:"DOC"},
+        {c:"DESSERT", n:"Passito di Pantelleria", p:"Pellegrino", r:"Sicilia (ITA)", v:"Zibibbo", d:"DOC"},
+        {c:"DESSERT", n:"Marsala Vergine Oro", p:"Florio", r:"Sicilia (ITA)", v:"Grillo", d:"DOC"},
+        {c:"DESSERT", n:"Sherry Pedro Ximénez", p:"Lustau", r:"Spagna", v:"Pedro Ximénez", d:"DO"},
+        {c:"DESSERT", n:"Vin de Constance", p:"Klein Constantia", r:"Sud Africa", v:"Muscat de Front.", d:"WO"},
+        {c:"DESSERT", n:"Vin Santo Occhio di P.", p:"Avignonesi", r:"Toscana (ITA)", v:"Sangiovese", d:"DOC"},
+        {c:"DESSERT", n:"Aleatico dell'Elba", p:"Mola", r:"Toscana (ITA)", v:"Aleatico", d:"DOCG"},
+        {c:"DESSERT", n:"Muffato della Sala", p:"Antinori", r:"Umbria (ITA)", v:"Sauv, Semillon, Gr.", d:"IGT"},
+        {c:"DESSERT", n:"Sagrantino Passito", p:"Arnaldo Caprai", r:"Umbria (ITA)", v:"Sagrantino", d:"DOCG"},
+        {c:"DESSERT", n:"Tokaji 6 Puttonyos", p:"Oremus", r:"Ungheria", v:"Furmint, Harslevelu", d:"PDO"},
+        {c:"DESSERT", n:"Recioto della Valpol.", p:"Quintarelli", r:"Veneto (ITA)", v:"Corvina Blend", d:"DOCG"},
+        {c:"DESSERT", n:"Recioto di Soave", p:"Pieropan", r:"Veneto (ITA)", v:"Garganega", d:"DOCG"},
+        {c:"DESSERT", n:"Passito di Refrontolo", p:"Colvendrà", r:"Veneto (ITA)", v:"Marzemino", d:"DOCG"},
+
+        // ROSATI
+        {c:"ROSATO", n:"Cerasuolo d'Abruzzo", p:"Valentini", r:"Abruzzo (ITA)", v:"Montepulciano", d:"DOC"},
+        {c:"ROSATO", n:"A.A. Lagrein Rosé", p:"Cantina Terlano", r:"Alto Adige (ITA)", v:"Lagrein", d:"DOC"},
+        {c:"ROSATO", n:"Kretzer", p:"Muri Gries", r:"Alto Adige (ITA)", v:"Lagrein", d:"DOC"},
+        {c:"ROSATO", n:"Vetere", p:"San Salvatore 1988", r:"Campania (ITA)", v:"Aglianico", d:"IGP"},
+        {c:"ROSATO", n:"Whispering Angel", p:"Caves d'Esclans", r:"Francia", v:"Grenache, Cinsault", d:"AOC"},
+        {c:"ROSATO", n:"Coeur de Grain", p:"Domaines Ott", r:"Francia", v:"Mourvèdre, Cinsault", d:"AOC"},
+        {c:"ROSATO", n:"Tavel Rosé", p:"Château d'Aqueria", r:"Francia", v:"Grenache, Clairette", d:"AOC"},
+        {c:"ROSATO", n:"Garrus", p:"Château d'Esclans", r:"Francia", v:"Grenache, Rolle", d:"AOC"},
+        {c:"ROSATO", n:"Rosamara", p:"Costaripa", r:"Lombardia (ITA)", v:"Groppello, Marzemino", d:"DOC"},
+        {c:"ROSATO", n:"Five Roses Anniversario", p:"Leone de Castris", r:"Puglia (ITA)", v:"Negroamaro, Malvasia", d:"IGT"},
+        {c:"ROSATO", n:"Rosa del Golfo", p:"Rosa del Golfo", r:"Puglia (ITA)", v:"Negroamaro", d:"IGT"},
+        {c:"ROSATO", n:"Etna Rosato", p:"Girolamo Russo", r:"Sicilia (ITA)", v:"Nerello Mascalese", d:"DOC"},
+        {c:"ROSATO", n:"Scalabrone", p:"Guado al Tasso", r:"Toscana (ITA)", v:"Cab.S, Merlot, Syrah", d:"DOC"},
+        {c:"ROSATO", n:"Gemma", p:"San Leonardo", r:"Trentino (ITA)", v:"Lagrein", d:"DOC"},
+
+        // ROSSI
+        {c:"ROSSO", n:"Montepulciano d'Abr.", p:"Emidio Pepe", r:"Abruzzo (ITA)", v:"Montepulciano", d:"DOC"},
+        {c:"ROSSO", n:"Montepulciano d'Abr.", p:"Valentini", r:"Abruzzo (ITA)", v:"Montepulciano", d:"DOC"},
+        {c:"ROSSO", n:"Lagrein Riserva", p:"Abbazia di Novacella", r:"Alto Adige (ITA)", v:"Lagrein", d:"DOC"},
+        {c:"ROSSO", n:"Pinot Nero Sanct Valentin", p:"S. Michele Appiano", r:"Alto Adige (ITA)", v:"Pinot Nero", d:"DOC"},
+        {c:"ROSSO", n:"Malbec Argentino", p:"Catena Zapata", r:"Argentina", v:"Malbec", d:"IG"},
+        {c:"ROSSO", n:"Grange", p:"Penfolds", r:"Australia", v:"Shiraz", d:"GI"},
+        {c:"ROSSO", n:"Grown Alchemist", p:"Penfolds", r:"Australia", v:"Shiraz", d:"GI"},
+        {c:"ROSSO", n:"Aglianico del Vulture", p:"Elena Fucci", r:"Basilicata (ITA)", v:"Aglianico", d:"DOC"},
+        {c:"ROSSO", n:"Taurasi Riserva", p:"Mastroberardino", r:"Campania (ITA)", v:"Aglianico", d:"DOCG"},
+        {c:"ROSSO", n:"Don Melchor", p:"Concha y Toro", r:"Cile", v:"Cab. Sauvignon", d:"DO"},
+        {c:"ROSSO", n:"Sena", p:"Eduardo Chadwick", r:"Cile", v:"Bordolese", d:"DO"},
+        {c:"ROSSO", n:"Romanée-Conti", p:"DRC", r:"Francia", v:"Pinot Nero", d:"AOC"},
+        {c:"ROSSO", n:"La Tâche", p:"DRC", r:"Francia", v:"Pinot Nero", d:"AOC"},
+        {c:"ROSSO", n:"Richebourg", p:"Domaine Leroy", r:"Francia", v:"Pinot Nero", d:"AOC"},
+        {c:"ROSSO", n:"Chambertin", p:"Armand Rousseau", r:"Francia", v:"Pinot Nero", d:"AOC"},
+        {c:"ROSSO", n:"Clos de Vougeot", p:"Meo-Camuzet", r:"Francia", v:"Pinot Nero", d:"AOC"},
+        {c:"ROSSO", n:"Petrus", p:"Petrus (Moueix)", r:"Francia", v:"Merlot", d:"AOC"},
+        {c:"ROSSO", n:"Ch. Lafite Rothschild", p:"Ch. Lafite Rothschild", r:"Francia", v:"Cab.S Blend", d:"AOC"},
+        {c:"ROSSO", n:"Ch. Latour", p:"Ch. Latour", r:"Francia", v:"Cab.S Blend", d:"AOC"},
+        {c:"ROSSO", n:"Cesanese Romanico", p:"Coletti Conti", r:"Lazio (ITA)", v:"Cesanese", d:"DOCG"},
+        {c:"ROSSO", n:"Baccarossa", p:"Poggio le Volpi", r:"Lazio (ITA)", v:"Nero Buono", d:"IGT"},
+        {c:"ROSSO", n:"Cumaro Riserva", p:"Umani Ronchi", r:"Marche (ITA)", v:"Montepulciano", d:"DOCG"},
+        {c:"ROSSO", n:"Kurni", p:"Oasi degli Angeli", r:"Marche (ITA)", v:"Montepulciano", d:"IGT"},
+        {c:"ROSSO", n:"Kupra", p:"Oasi degli Angeli", r:"Marche (ITA)", v:"Bordò (Grenache)", d:"IGT"},
+        {c:"ROSSO", n:"Roggio del Filare", p:"Velenosi", r:"Marche (ITA)", v:"Montepulciano, Sang.", d:"DOC"},
+        {c:"ROSSO", n:"Morro d'Alba", p:"Vicari", r:"Marche (ITA)", v:"Lacrima", d:"DOC"},
+        {c:"ROSSO", n:"Barbaresco", p:"Gaja", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barbaresco Costa Russi", p:"Gaja", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barolo Sperss", p:"Gaja", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barolo Monfortino", p:"Giacomo Conterno", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barolo Cascina Francia", p:"Giacomo Conterno", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barolo Brunate", p:"Giuseppe Rinaldi", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barolo Rocche", p:"Vietti", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barbaresco Asili", p:"Bruno Giacosa", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barolo Falletto", p:"Bruno Giacosa", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Gattinara Tre Vigne", p:"Travaglini", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barolo Cannubi", p:"Paolo Scavino", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barolo Cerretta", p:"Ettore Germano", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barolo Bussia", p:"Aldo Conterno", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barbaresco Rabajà", p:"Bruno Rocca", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barbaresco Santo Stefano", p:"Castello di Neive", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Barolo Monprivato", p:"Giuseppe Mascarello", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Carema Etichetta Bianca", p:"Ferrando", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOC"},
+        {c:"ROSSO", n:"Ghemme Collis Carellae", p:"Cantalupo", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOCG"},
+        {c:"ROSSO", n:"Boca", p:"Le Piane", r:"Piemonte (ITA)", v:"Nebbiolo, Vespolina", d:"DOC"},
+        {c:"ROSSO", n:"Lessona", p:"Proprietà Sperino", r:"Piemonte (ITA)", v:"Nebbiolo", d:"DOC"},
+        {c:"ROSSO", n:"Barbera d'Alba Marun", p:"Matteo Correggia", r:"Piemonte (ITA)", v:"Barbera", d:"DOC"},
+        {c:"ROSSO", n:"Barbera Bricco Uccellone", p:"Braida", r:"Piemonte (ITA)", v:"Barbera", d:"DOCG"},
+        {c:"ROSSO", n:"Dolcetto Bricco d. Oriolo", p:"Azelia", r:"Piemonte (ITA)", v:"Dolcetto", d:"DOC"},
+        {c:"ROSSO", n:"Grignolino d'Asti", p:"Accornero", r:"Piemonte (ITA)", v:"Grignolino", d:"DOC"},
+        {c:"ROSSO", n:"Freisa d'Asti Kyè", p:"Vajra", r:"Piemonte (ITA)", v:"Freisa", d:"DOC"},
+        {c:"ROSSO", n:"Sessantanni", p:"San Marzano", r:"Puglia (ITA)", v:"Primitivo", d:"DOP"},
+        {c:"ROSSO", n:"Es", p:"Gianfranco Fino", r:"Puglia (ITA)", v:"Primitivo", d:"DOC"},
+        {c:"ROSSO", n:"Graticciaia", p:"Agricole Vallone", r:"Puglia (ITA)", v:"Negroamaro", d:"IGT"},
+        {c:"ROSSO", n:"Turriga", p:"Argiolas", r:"Sardegna (ITA)", v:"Cannonau, Carignano", d:"IGT"},
+        {c:"ROSSO", n:"Terre Brune", p:"Santadi", r:"Sardegna (ITA)", v:"Carignano", d:"DOC"},
+        {c:"ROSSO", n:"Barrua", p:"Agripunica", r:"Sardegna (ITA)", v:"Carignano, Cab.S", d:"IGT"},
+        {c:"ROSSO", n:"Dettori Rosso", p:"Tenute Dettori", r:"Sardegna (ITA)", v:"Cannonau", d:"IGT"},
+        {c:"ROSSO", n:"Mille e Una Notte", p:"Donnafugata", r:"Sicilia (ITA)", v:"Nero d’Avola", d:"DOC"},
+        {c:"ROSSO", n:"Franchetti", p:"Passopisciaro", r:"Sicilia (ITA)", v:"Petit Verdot, Cesanese", d:"IGT"},
+        {c:"ROSSO", n:"Etna Rosso Calderara S.", p:"Marc de Grazia", r:"Sicilia (ITA)", v:"Nerello Mascalese", d:"DOC"},
+        {c:"ROSSO", n:"Faro Palari", p:"Palari", r:"Sicilia (ITA)", v:"Nerello Masc.", d:"DOC"},
+        {c:"ROSSO", n:"Unico", p:"Vega Sicilia", r:"Spagna", v:"Tempranillo", d:"DO"},
+        {c:"ROSSO", n:"Pingus", p:"Dominio de Pingus", r:"Spagna", v:"Tempranillo", d:"DO"},
+        {c:"ROSSO", n:"Clos Erasmus", p:"Daphne Glorian", r:"Spagna", v:"Garnacha, Syrah", d:"DOQ"},
+        {c:"ROSSO", n:"Pinotage Black Label", p:"Kanonkop", r:"Sud Africa", v:"Pinotage", d:"WO"},
+        {c:"ROSSO", n:"Brunello 1978 (Storico)", p:"Biondi-Santi", r:"Toscana (ITA)", v:"Sangiovese", d:"DOCG"},
+        {c:"ROSSO", n:"Sassicaia", p:"Tenuta San Guido", r:"Toscana (ITA)", v:"Cab.S, Cab.F", d:"DOC"},
+        {c:"ROSSO", n:"Ornellaia", p:"Tenuta dell'Ornellaia", r:"Toscana (ITA)", v:"Cab.S, Merlot", d:"DOC"},
+        {c:"ROSSO", n:"Masseto", p:"Tenuta dell'Ornellaia", r:"Toscana (ITA)", v:"Merlot", d:"IGT"},
+        {c:"ROSSO", n:"Tignanello", p:"Antinori", r:"Toscana (ITA)", v:"Sangiovese, Cab.S", d:"IGT"},
+        {c:"ROSSO", n:"Solaia", p:"Antinori", r:"Toscana (ITA)", v:"Cab.S, Sangiovese", d:"IGT"},
+        {c:"ROSSO", n:"Pergole Torte", p:"Montevertine", r:"Toscana (ITA)", v:"Sangiovese", d:"IGT"},
+        {c:"ROSSO", n:"Flaccianello della Pieve", p:"Fontodi", r:"Toscana (ITA)", v:"Sangiovese", d:"IGT"},
+        {c:"ROSSO", n:"Vigna del Sorbo", p:"Fontodi", r:"Toscana (ITA)", v:"Sangiovese", d:"DOCG"},
+        {c:"ROSSO", n:"Syrah Case Via", p:"Fontodi", r:"Toscana (ITA)", v:"Syrah", d:"IGT"},
+        {c:"ROSSO", n:"Chianti Cl. Riserva", p:"Castell'in Villa", r:"Toscana (ITA)", v:"Sangiovese", d:"DOCG"},
+        {c:"ROSSO", n:"Brunello Cerretalto", p:"Casanova di Neri", r:"Toscana (ITA)", v:"Sangiovese", d:"DOCG"},
+        {c:"ROSSO", n:"Brunello Madonna d. Piano", p:"Valdicava", r:"Toscana (ITA)", v:"Sangiovese", d:"DOCG"},
+        {c:"ROSSO", n:"Brunello Riserva", p:"Poggio di Sotto", r:"Toscana (ITA)", v:"Sangiovese", d:"DOCG"},
+        {c:"ROSSO", n:"Brunello di Montalcino", p:"Poggio Landi", r:"Toscana (ITA)", v:"Sangiovese", d:"DOCG"},
+        {c:"ROSSO", n:"I Sodi di S. Niccolò", p:"Castellare di Castellina", r:"Toscana (ITA)", v:"Sangiovese, Malvasia", d:"IGT"},
+        {c:"ROSSO", n:"Vigorello", p:"San Felice", r:"Toscana (ITA)", v:"Pugnitello, Blend", d:"IGT"},
+        {c:"ROSSO", n:"Galatrona", p:"Petrolo", r:"Toscana (ITA)", v:"Merlot", d:"IGT"},
+        {c:"ROSSO", n:"L'Apparita", p:"Castello di Ama", r:"Toscana (ITA)", v:"Merlot", d:"IGT"},
+        {c:"ROSSO", n:"Siepi", p:"Castello di Fonterutoli", r:"Toscana (ITA)", v:"Sangiovese, Merlot", d:"IGT"},
+        {c:"ROSSO", n:"Cepparello", p:"Isole e Olena", r:"Toscana (ITA)", v:"Sangiovese", d:"IGT"},
+        {c:"ROSSO", n:"Chianti Cl. Gran Selez.", p:"Ricasoli", r:"Toscana (ITA)", v:"Sangiovese", d:"DOCG"},
+        {c:"ROSSO", n:"Luce", p:"Luce della Vite", r:"Toscana (ITA)", v:"Merlot, Sangiovese", d:"IGT"},
+        {c:"ROSSO", n:"Messorio", p:"Le Macchiole", r:"Toscana (ITA)", v:"Merlot", d:"IGT"},
+        {c:"ROSSO", n:"Paleo Rosso", p:"Le Macchiole", r:"Toscana (ITA)", v:"Cabernet Franc", d:"IGT"},
+        {c:"ROSSO", n:"Scrio", p:"Le Macchiole", r:"Toscana (ITA)", v:"Syrah", d:"IGT"},
+        {c:"ROSSO", n:"Fontalloro", p:"Fèlsina", r:"Toscana (ITA)", v:"Sangiovese", d:"IGT"},
+        {c:"ROSSO", n:"Colline Lucchesi", p:"Tenuta di Valgiano", r:"Toscana (ITA)", v:"Sangiovese, Syrah, Merl.", d:"DOC"},
+        {c:"ROSSO", n:"Nobile di Montepulciano", p:"Poliziano", r:"Toscana (ITA)", v:"Sangiovese", d:"DOCG"},
+        {c:"ROSSO", n:"Redigaffi", p:"Tua Rita", r:"Toscana (ITA)", v:"Merlot", d:"IGT"},
+        {c:"ROSSO", n:"Oreno", p:"Tenuta Sette Ponti", r:"Toscana (ITA)", v:"Merlot, Cab.S, Syrah", d:"IGT"},
+        {c:"ROSSO", n:"San Leonardo", p:"San Leonardo", r:"Trentino (ITA)", v:"Cab.S, Carmenere, Merl", d:"IGT"},
+        {c:"ROSSO", n:"Granato", p:"Foradori", r:"Trentino (ITA)", v:"Teroldego", d:"IGT"},
+        {c:"ROSSO", n:"Sangue di Drago", p:"Marco Donati", r:"Trentino (ITA)", v:"Teroldego", d:"DOC"},
+        {c:"ROSSO", n:"Sagrantino 25 Anni", p:"Arnaldo Caprai", r:"Umbria (ITA)", v:"Sagrantino", d:"DOCG"},
+        {c:"ROSSO", n:"San Giorgio", p:"Lungarotti", r:"Umbria (ITA)", v:"Sangiovese, Cab.S", d:"IGT"},
+        {c:"ROSSO", n:"Rubesco V. Monticchio", p:"Lungarotti", r:"Umbria (ITA)", v:"Sangiovese", d:"DOCG"},
+        {c:"ROSSO", n:"Villa Fidelia Rosso", p:"Sportoletti", r:"Umbria (ITA)", v:"Merlot, Cab.S, Cab.F", d:"IGT"},
+        {c:"ROSSO", n:"Opus One", p:"Mondavi/Rothschild", r:"USA", v:"Bordolese", d:"AVA"},
+        {c:"ROSSO", n:"Screaming Eagle", p:"Screaming Eagle", r:"USA", v:"Cab. Sauvignon", d:"AVA"},
+        {c:"ROSSO", n:"Heitz Martha's Vineyard", p:"Heitz Cellar", r:"USA", v:"Cab. Sauvignon", d:"AVA"},
+        {c:"ROSSO", n:"Pinot Noir Mt. Harlan", p:"Calera", r:"USA", v:"Pinot Noir", d:"AVA"},
+        {c:"ROSSO", n:"Amarone Riserva", p:"Quintarelli", r:"Veneto (ITA)", v:"Corvina Blend", d:"DOCG"},
+        {c:"ROSSO", n:"Amarone Dal Forno", p:"Romano Dal Forno", r:"Veneto (ITA)", v:"Corvina Blend", d:"DOCG"},
+        {c:"ROSSO", n:"Amarone S. Urbano", p:"Speri", r:"Veneto (ITA)", v:"Corvina Blend", d:"DOCG"},
+        {c:"ROSSO", n:"Valpolicella Ripassa", p:"Zenato", r:"Veneto (ITA)", v:"Corvina Blend", d:"DOC"}
+    ];
+
+    function filterWines(category) {
+        // Aggiorna lo stato dei bottoni
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        const container = document.getElementById('wine-list-container');
+        container.innerHTML = ''; // Pulisce la lista
+
+        // Filtra i vini in base alla categoria selezionata
+        // BOLLICINE include: BOLLICINE (tutti i tipi) + CHAMPAGNE
+        let filteredWines;
+        if (category === 'BOLLICINE') {
+            filteredWines = wineDB.filter(w => w.c === 'BOLLICINE' || w.c === 'CHAMPAGNE');
+        } else {
+            filteredWines = wineDB.filter(w => w.c === category);
+        }
+
+        // Raggruppa per Regione
+        const winesByRegion = filteredWines.reduce((acc, wine) => {
+            // Se è una bollicina, raggruppiamo prima per Tipo (es. Champagne, Metodo Classico) poi Regione? 
+            // Per semplicità e pulizia, raggruppiamo per Regione/Paese come richiesto
+            const region = wine.r;
+            if (!acc[region]) {
+                acc[region] = [];
+            }
+            acc[region].push(wine);
+            return acc;
+        }, {});
+
+        // Ordina le regioni alfabeticamente
+        const sortedRegions = Object.keys(winesByRegion).sort();
+
+        // Genera HTML
+        sortedRegions.forEach(region => {
+            const wines = winesByRegion[region];
+            let html = `<div class="region-block"><h3 class="region-title">${region}</h3>`;
+            
+            wines.forEach(wine => {
+                // Per le bollicine mostriamo anche il tipo (es. Metodo Classico)
+                let extraTag = "";
+                if (wine.t) { extraTag = `<span class="wine-type-tag">${wine.t}</span>`; }
+
+                html += `
+                <div class="wine-card">
+                    <div class="wine-info">
+                        <div class="wine-name">${wine.n} ${extraTag}</div>
+                        <div class="wine-producer">${wine.p}</div>
+                        <div class="wine-details">${wine.v} | ${wine.d}</div>
+                    </div>
+                </div>`;
+            });
+            
+            html += `</div>`;
+            container.innerHTML += html;
+        });
+    }
+
+    // Carica i BOLLICINE all'avvio
+    window.onload = function() {
+        // Simula click sul primo bottone
+        document.querySelector('.tab-btn.active').click();
+    };
+</script>
+
+</body>
+</html>
